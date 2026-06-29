@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const C = {
   bg:"#F7F8FA", surface:"#FFFFFF", card:"#FFFFFF", border:"#E8EAF0",
   accent:"#6366F1", blue:"#3B82F6", green:"#10B981", red:"#EF4444",
-  text:"#1A1A2E", muted:"#9098B1", purple:"#8B5CF6", amber:"#DB2777",
+  text:"#1A1A2E", muted:"#9098B1", purple:"#8B5CF6", amber:"#0EA5E9",
 };
 
 const ASSETS = ["現金","カード","PayPay","その他"];
@@ -67,7 +67,7 @@ function AssetPicker({ value, onChange }) {
         <button key={a} onClick={()=>onChange(a)} style={{
           padding:"6px 12px", borderRadius:20, fontSize:12, cursor:"pointer",
           border:`1.5px solid ${value===a?C.purple:C.border}`,
-          background: value===a?`#FCE7F3`:"transparent",
+          background: value===a?`#E0F2FE`:"transparent",
           color:       value===a?C.purple:C.muted,
           fontWeight:  value===a?700:400,
         }}>{a}</button>
@@ -329,7 +329,7 @@ function RecordTab({ monthRecords, futureRecs, allRecords, setRecords, categorie
             </FRow>
             <FRow label="メモ"><input placeholder="任意" value={form.note} onChange={e=>setForm(f=>({...f,note:e.target.value}))} style={inp} /></FRow>
             {isFuture(form.date) && (
-              <div style={{ background:`#FCE7F3`, border:`1px solid ${C.amber}33`, borderRadius:10, padding:"8px 12px", marginBottom:12, fontSize:12, color:C.amber }}>
+              <div style={{ background:`#E0F2FE`, border:`1px solid ${C.amber}33`, borderRadius:10, padding:"8px 12px", marginBottom:12, fontSize:12, color:C.amber }}>
                 📅 未来の日付です。「予定」として記録されます。
               </div>
             )}
@@ -355,7 +355,7 @@ function RecordRow({ r, categories, onDel, future }) {
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
           <span style={{ fontSize:13, fontWeight:600 }}>{sub?.name||cat?.name||r.catId}</span>
           {r.asset && <span style={{ fontSize:10, color:C.purple, background:"#F5F3FF", borderRadius:10, padding:"1px 6px" }}>{r.asset}</span>}
-          {future && <span style={{ fontSize:10, color:C.amber, background:`#FCE7F3`, borderRadius:10, padding:"1px 6px" }}>予定</span>}
+          {future && <span style={{ fontSize:10, color:C.amber, background:`#E0F2FE`, borderRadius:10, padding:"1px 6px" }}>予定</span>}
         </div>
         {r.note && <div style={{ fontSize:11, color:C.muted, marginTop:1 }}>{r.note}</div>}
       </div>
@@ -455,9 +455,47 @@ function CalendarTab({ records, futureRecs, categories, viewMonth, allRecords, s
   const selFuture  = selDateStr?futureRecs.filter(r=>r.date===selDateStr):[];
   const del = id => setRecords(r=>r.filter(x=>x.id!==id));
 
+  // 月全体の支払手段別集計（過去+未来の支出）
+  const allMonthForAsset = [...records, ...futureRecs];
+  const assetMap = {};
+  ASSETS.forEach(a => { assetMap[a] = 0; });
+  allMonthForAsset.filter(r=>r.type==="expense"&&r.asset).forEach(r=>{
+    if(assetMap[r.asset]!==undefined) assetMap[r.asset]+=r.amount;
+    else assetMap["その他"]+=r.amount;
+  });
+  const assetTotal = Object.values(assetMap).reduce((s,v)=>s+v,0);
+
   return (
     <div>
       <WorkToggle works={works} work={work} setWork={setWork} />
+
+      {/* 支払手段別合計 */}
+      {assetTotal > 0 && (
+        <div style={{ background:C.card, border:`1px solid ${C.border}`, borderRadius:14, padding:14, marginBottom:12 }}>
+          <div style={{ fontSize:12, fontWeight:700, color:C.muted, marginBottom:10, letterSpacing:"0.04em" }}>支払手段別 支出合計</div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+            {ASSETS.map(a => {
+              if(!assetMap[a]) return null;
+              const pct = assetTotal > 0 ? assetMap[a] / assetTotal : 0;
+              const assetColors = { "現金":"#10B981", "カード":"#6366F1", "PayPay":"#F59E0B", "その他":"#9098B1" };
+              const col = assetColors[a] || C.muted;
+              return (
+                <div key={a} style={{ background:C.bg, borderRadius:10, padding:"10px 12px" }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:5 }}>
+                    <span style={{ fontSize:12, fontWeight:600, color:C.text }}>{a}</span>
+                    <span style={{ fontSize:10, color:C.muted }}>{Math.round(pct*100)}%</span>
+                  </div>
+                  <div style={{ height:4, background:C.border, borderRadius:99, overflow:"hidden", marginBottom:5 }}>
+                    <div style={{ height:"100%", width:`${pct*100}%`, borderRadius:99, background:col }} />
+                  </div>
+                  <div style={{ fontSize:13, fontWeight:700, color:col }}>¥{assetMap[a].toLocaleString()}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div style={{ background:C.card, border:`1px solid ${C.border}`, borderRadius:14, padding:"10px 8px", marginBottom:12 }}>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2, marginBottom:4 }}>
           {["日","月","火","水","木","金","土"].map((d,i)=>(
@@ -482,8 +520,8 @@ function CalendarTab({ records, futureRecs, categories, viewMonth, allRecords, s
                 <div style={{ fontSize:12, fontWeight:isT||isSel?700:400, color:isSel?"#fff":isT?wInfo.color:C.text, marginBottom:2 }}>{d}</div>
                 {data?.income>0  && <div style={{ fontSize:7, color:isSel?"#A5F3D0":C.green, fontWeight:600, lineHeight:1.4 }}>+¥{data.income.toLocaleString()}</div>}
                 {data?.expense>0 && <div style={{ fontSize:7, color:isSel?"#FCA5A5":C.red,   fontWeight:600, lineHeight:1.4 }}>-¥{data.expense.toLocaleString()}</div>}
-                {fdata?.income>0  && <div style={{ fontSize:7, color:isSel?"#F9A8D4":C.amber, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>+¥{fdata.income.toLocaleString()}</div>}
-                {fdata?.expense>0 && <div style={{ fontSize:7, color:isSel?"#F9A8D4":C.amber, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>−¥{fdata.expense.toLocaleString()}</div>}
+                {fdata?.income>0  && <div style={{ fontSize:7, color:isSel?"#7DD3FC":C.amber, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>+¥{fdata.income.toLocaleString()}</div>}
+                {fdata?.expense>0 && <div style={{ fontSize:7, color:isSel?"#7DD3FC":C.amber, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>−¥{fdata.expense.toLocaleString()}</div>}
               </div>
             );
           })}
@@ -513,7 +551,7 @@ function CalendarTab({ records, futureRecs, categories, viewMonth, allRecords, s
                     <div style={{ textAlign:"center" }}><div style={{ fontSize:10, color:C.muted }}>合計</div><div style={{ fontSize:14, fontWeight:700, color:tot>=0?wInfo.color:C.red }}>¥{tot.toLocaleString()}</div></div>
                   </div>
                   {(fInc>0||fExp>0) && (
-                    <div style={{ marginTop:8, background:`#FCE7F3`, borderRadius:8, padding:"6px 12px", fontSize:11, color:C.amber, display:"flex", gap:12 }}>
+                    <div style={{ marginTop:8, background:`#E0F2FE`, borderRadius:8, padding:"6px 12px", fontSize:11, color:C.amber, display:"flex", gap:12 }}>
                       <span>予定：</span>
                       {fInc>0&&<span>+¥{fInc.toLocaleString()}</span>}
                       {fExp>0&&<span>−¥{fExp.toLocaleString()}</span>}
