@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const C = {
   bg:"#F7F8FA", surface:"#FFFFFF", card:"#FFFFFF", border:"#E8EAF0",
   accent:"#6366F1", blue:"#3B82F6", green:"#10B981", red:"#EF4444",
-  text:"#1A1A2E", muted:"#9098B1", purple:"#8B5CF6", teal:"#0D9488",
+  text:"#1A1A2E", muted:"#9098B1", purple:"#8B5CF6", amber:"#DB2777",
 };
 
 const ASSETS = ["現金","カード","PayPay","その他"];
@@ -67,7 +67,7 @@ function AssetPicker({ value, onChange }) {
         <button key={a} onClick={()=>onChange(a)} style={{
           padding:"6px 12px", borderRadius:20, fontSize:12, cursor:"pointer",
           border:`1.5px solid ${value===a?C.purple:C.border}`,
-          background: value===a?`#CCFBF1`:"transparent",
+          background: value===a?`#FCE7F3`:"transparent",
           color:       value===a?C.purple:C.muted,
           fontWeight:  value===a?700:400,
         }}>{a}</button>
@@ -210,8 +210,8 @@ function RecordTab({ monthRecords, futureRecs, allRecords, setRecords, categorie
       {Object.keys(fGrouped).length>0 && (
         <div style={{ marginBottom:20 }}>
           <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
-            <div style={{ width:3, height:14, borderRadius:99, background:C.teal }} />
-            <span style={{ fontSize:12, fontWeight:700, color:C.teal }}>予定（未来の収支）</span>
+            <div style={{ width:3, height:14, borderRadius:99, background:C.amber }} />
+            <span style={{ fontSize:12, fontWeight:700, color:C.amber }}>予定（未来の収支）</span>
           </div>
           {Object.keys(fGrouped).map(date => {
             const dr = fGrouped[date];
@@ -262,7 +262,7 @@ function RecordTab({ monthRecords, futureRecs, allRecords, setRecords, categorie
 
       {/* FAB */}
       <button onClick={openModal} style={{
-        position:"fixed", bottom:86, right:"calc(50% - 228px)",
+        position:"fixed", bottom:86, right:16,
         width:56, height:56, borderRadius:"50%",
         background:wInfo.color, border:"none", cursor:"pointer",
         boxShadow:`0 4px 18px ${wInfo.color}55`,
@@ -329,7 +329,7 @@ function RecordTab({ monthRecords, futureRecs, allRecords, setRecords, categorie
             </FRow>
             <FRow label="メモ"><input placeholder="任意" value={form.note} onChange={e=>setForm(f=>({...f,note:e.target.value}))} style={inp} /></FRow>
             {isFuture(form.date) && (
-              <div style={{ background:`#CCFBF1`, border:`1px solid ${C.teal}33`, borderRadius:10, padding:"8px 12px", marginBottom:12, fontSize:12, color:C.teal }}>
+              <div style={{ background:`#FCE7F3`, border:`1px solid ${C.amber}33`, borderRadius:10, padding:"8px 12px", marginBottom:12, fontSize:12, color:C.amber }}>
                 📅 未来の日付です。「予定」として記録されます。
               </div>
             )}
@@ -347,7 +347,7 @@ function RecordRow({ r, categories, onDel, future }) {
   const cat = categories.find(c=>c.id===r.catId);
   const sub = cat?.subs?.find(s=>s.id===r.subId);
   return (
-    <div style={{ background:C.card, border:`1px solid ${future?C.teal+"44":C.border}`, borderRadius:12, padding:"11px 14px", marginBottom:6, display:"flex", alignItems:"center", gap:10, opacity:future?0.85:1 }}>
+    <div style={{ background:C.card, border:`1px solid ${future?C.amber+"44":C.border}`, borderRadius:12, padding:"11px 14px", marginBottom:6, display:"flex", alignItems:"center", gap:10, opacity:future?0.85:1 }}>
       <div style={{ width:36, height:36, borderRadius:10, background:(cat?.color||C.muted)+"18", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
         <span style={{ fontSize:11, fontWeight:700, color:cat?.color||C.muted }}>{cat?.name?.slice(0,2)||"?"}</span>
       </div>
@@ -355,7 +355,7 @@ function RecordRow({ r, categories, onDel, future }) {
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
           <span style={{ fontSize:13, fontWeight:600 }}>{sub?.name||cat?.name||r.catId}</span>
           {r.asset && <span style={{ fontSize:10, color:C.purple, background:"#F5F3FF", borderRadius:10, padding:"1px 6px" }}>{r.asset}</span>}
-          {future && <span style={{ fontSize:10, color:C.teal, background:`#CCFBF1`, borderRadius:10, padding:"1px 6px" }}>予定</span>}
+          {future && <span style={{ fontSize:10, color:C.amber, background:`#FCE7F3`, borderRadius:10, padding:"1px 6px" }}>予定</span>}
         </div>
         {r.note && <div style={{ fontSize:11, color:C.muted, marginTop:1 }}>{r.note}</div>}
       </div>
@@ -482,8 +482,8 @@ function CalendarTab({ records, futureRecs, categories, viewMonth, allRecords, s
                 <div style={{ fontSize:12, fontWeight:isT||isSel?700:400, color:isSel?"#fff":isT?wInfo.color:C.text, marginBottom:2 }}>{d}</div>
                 {data?.income>0  && <div style={{ fontSize:7, color:isSel?"#A5F3D0":C.green, fontWeight:600, lineHeight:1.4 }}>+¥{data.income.toLocaleString()}</div>}
                 {data?.expense>0 && <div style={{ fontSize:7, color:isSel?"#FCA5A5":C.red,   fontWeight:600, lineHeight:1.4 }}>-¥{data.expense.toLocaleString()}</div>}
-                {fdata?.income>0  && <div style={{ fontSize:7, color:isSel?"#99F6E4":C.teal, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>+¥{fdata.income.toLocaleString()}</div>}
-                {fdata?.expense>0 && <div style={{ fontSize:7, color:isSel?"#99F6E4":C.teal, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>−¥{fdata.expense.toLocaleString()}</div>}
+                {fdata?.income>0  && <div style={{ fontSize:7, color:isSel?"#F9A8D4":C.amber, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>+¥{fdata.income.toLocaleString()}</div>}
+                {fdata?.expense>0 && <div style={{ fontSize:7, color:isSel?"#F9A8D4":C.amber, fontWeight:600, lineHeight:1.4, opacity:0.9 }}>−¥{fdata.expense.toLocaleString()}</div>}
               </div>
             );
           })}
@@ -513,7 +513,7 @@ function CalendarTab({ records, futureRecs, categories, viewMonth, allRecords, s
                     <div style={{ textAlign:"center" }}><div style={{ fontSize:10, color:C.muted }}>合計</div><div style={{ fontSize:14, fontWeight:700, color:tot>=0?wInfo.color:C.red }}>¥{tot.toLocaleString()}</div></div>
                   </div>
                   {(fInc>0||fExp>0) && (
-                    <div style={{ marginTop:8, background:`#CCFBF1`, borderRadius:8, padding:"6px 12px", fontSize:11, color:C.teal, display:"flex", gap:12 }}>
+                    <div style={{ marginTop:8, background:`#FCE7F3`, borderRadius:8, padding:"6px 12px", fontSize:11, color:C.amber, display:"flex", gap:12 }}>
                       <span>予定：</span>
                       {fInc>0&&<span>+¥{fInc.toLocaleString()}</span>}
                       {fExp>0&&<span>−¥{fExp.toLocaleString()}</span>}
